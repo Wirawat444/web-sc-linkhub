@@ -1,26 +1,63 @@
 import { prisma } from "@/lib/prisma"
+import { getAuthSession } from "@/lib/auth"
+import Link from "next/link"
+import UserMenu from "@/app/components/UserMenu"
+import HomeClient from "@/app/components/HomeClient"
 
 export default async function Home() {
-  const users = await prisma.user.findMany()
+  const session = await getAuthSession()
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+  })
 
   return (
-    <div className="max-w-xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">CS LinkHub</h1>
+    <div className="min-h-screen bg-linear-to-b from-blue-50 to-white">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-2xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between gap-4">
+            {/* Logo */}
+            <Link href="/" className="text-2xl font-bold text-blue-600 whitespace-nowrap">
+              LinkHub
+            </Link>
 
-      <input
-        className="w-full border p-3 rounded-lg mb-6"
-        placeholder="Search"
-      />
+            {/* Menu */}
+            <div className="flex items-center gap-3 ml-auto">
+              {session ? (
+                <>
+                  <Link 
+                    href="/dashboard"
+                    className="text-gray-700 hover:text-blue-600 font-medium text-sm px-3 py-2 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    Dashboard
+                  </Link>
+                  <UserMenu session={session} />
+                </>
+              ) : (
+                <>
+                  <Link 
+                    href="/login"
+                    className="text-gray-700 hover:text-blue-600 font-medium text-sm px-3 py-2 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    Login
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
 
-      {users.map(user => (
-        <a
-          key={user.id}
-          href={`/${user.username}`}
-          className="block p-4 bg-white rounded-xl shadow mb-3"
-        >
-          {user.name}
-        </a>
-      ))}
+      <div className="max-w-2xl mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-5xl font-bold text-gray-900 mb-2">CS LinkHub</h1>
+          <p className="text-gray-600">Discover amazing link collections from creators</p>
+        </div>
+
+        {/* Search and Users */}
+        <HomeClient users={users as any} session={session} />
+      </div>
     </div>
   )
 }
