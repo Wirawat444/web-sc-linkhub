@@ -15,7 +15,7 @@ interface User {
   id: string
   name: string | null
   username: string | null
-  email: string
+  email: string | null
   image: string | null
   bio: string | null
   links: LinkItem[]
@@ -70,7 +70,7 @@ export default function HomeClient({ initialUsers, session }: HomeClientProps) {
         (u) =>
           u.name?.toLowerCase().includes(q) ||
           u.username?.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q)
+          u.email?.toLowerCase().includes(q)
       )
     }
     return [...filtered].sort((a, b) =>
@@ -333,7 +333,7 @@ function UserCard({ user, view }: { user: User; view: "grid" | "list" }) {
           {user.name || "Creator"}
         </Link>
         <p style={{ fontSize: "0.8rem", color: "#aaa", marginBottom: view === "grid" ? 8 : 0, fontFamily: sans }}>
-          {user.username ? `@${user.username}` : user.email}
+          {user.username ? `@${user.username}` : (user.email ?? "")}
         </p>
         {user.bio && view === "list" && (
           <p style={{ fontSize: "0.8rem", color: "#888", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 360 }}>
