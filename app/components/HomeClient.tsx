@@ -8,7 +8,7 @@ interface LinkItem {
   id: string
   title: string
   url: string
-  description: string | null
+  description?: string | null
 }
 
 interface User {
