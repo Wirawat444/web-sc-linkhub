@@ -10,15 +10,28 @@ export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
+  // useEffect #1: โหลด profile (reload เมื่อ session เปลี่ยน)
   useEffect(() => {
-    if (!session?.user || !menuRef.current) return
+    if (!session?.user?.email) return
 
+    const loadProfile = async () => {
+      try {
+        const res = await fetch("/api/user/profile")
+        if (!res.ok) return
+        const data = await res.json()
+        setUserImage(data.image)
+      } catch {}
+    }
+    loadProfile()
+  }, [session?.user?.email])
+
+  // useEffect #2: จับ click outside
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
@@ -28,7 +41,7 @@ export default function UserMenu() {
   }
 
   const userName = (session.user as any).name || session.user.email || "User"
-  const userImage = (session.user as any).image
+  const sessionImage = (session.user as any).image
   const userEmail = session.user.email || ""
 
   return (
@@ -37,13 +50,11 @@ export default function UserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-lg transition"
       >
-        {userImage && (
-          <img 
-            src={userImage} 
-            alt={userName}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        )}
+        <img
+          src={userImage || sessionImage || "/default-avatar.png"}
+          alt={userName}
+          className="w-8 h-8 rounded-full object-cover"
+        />
         <span className="text-sm font-medium text-gray-700 hidden sm:block">
           {userName.split(" ")[0]}
         </span>
